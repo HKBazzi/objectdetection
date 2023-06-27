@@ -37,7 +37,7 @@ def CalCRC8(p):
         crc = CrcTable[(crc ^ val) & 0xff]
     return crc
 
-def AssignValues(package):
+def AssignValues(package, client):
     frame = {
         'header': package[0],
         'ver_len': package[1],
@@ -70,23 +70,6 @@ def AssignValues(package):
                     frame['object_within_2m'] = 1
                     print(f"Object within 2m detected: Point {i}, Distance: {distance}, Angle = {angle}")
 
-    return frame
-
-
-
-BROKER = "localhost"
-PORT = 1883
-TOPIC = "lidar/object_detection"
-
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("Connected to MQTT Broker!")
-    else:
-        print("Failed to connect, return code %d\n", rc)
-
-def AssignValues(package, client):
-    # ... (rest of your code)
-
     if frame['object_within_2m']:
         # Publish a message to the MQTT broker
         message = {
@@ -97,6 +80,16 @@ def AssignValues(package, client):
         print(f"Published message to topic {TOPIC}")
 
     return frame
+
+BROKER = "localhost"
+PORT = 1883
+TOPIC = "lidar/object_detection"
+
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT Broker!")
+    else:
+        print("Failed to connect, return code %d\n", rc)
 
 def main():
     # Create a MQTT client
@@ -112,7 +105,7 @@ def main():
     client.loop_start()
 
     counter = 0
-    ser = serial.Serial(port='ttyUSB0', baudrate=230400, bytesize=8, parity='N', stopbits=1, timeout=1)
+    ser = serial.Serial(port='/dev/ttyUSB0', baudrate=230400, bytesize=8, parity='N', stopbits=1, timeout=1)
 
     package = [0] * PACKAGE_SIZE
     packageIndex = 0
